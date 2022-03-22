@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Infiltrated</title>
+		<script>
+			var socket;
+			var isGuest = true;
+			var role = "HACKER"; //or AGENT
+			var phase = "MESSAGING"; //use for some logic in the javascript //messaging, voting.
+			function connectToServer() {
+				socket = new WebSocket("ws://localhost:8085/Final_Prototype/ws");
+				socket.onopen = function(event) {
+					document.getElementById("chat").innerHTML += "Connected!<br />";
+				}
+				socket.onmessage = function(event) {
+					//new style of communication
+					debug("RAW : " + event.data);
+					var evinfo = event.data.split("*=");
+					var command = evinfo[0];
+					var data = evinfo[1];
+					if (command == "TEXT"){
+						addTo("chat", data);
+					}
+					else if (command == "TIME"){
+						set("time", data);
+					}
+					else if (command == "SETNAME"){
+						set("name", data);
+					}
+					else if (command == "GETNAME"){
+						socket.send("MYNAME*=" + document.getElementById("name").innerHTML);
+					}
+					else if (command == "KILLOPTIONS"){ //handle whether the client ever receives this on the server side.
+						setKillForm(data);
+					}
+					else if (command == "VOTEOPTIONS"){
+						setVoteForm(data);
+					}
+					else if (command == "KILL"){
+						die();
+					}
+					else if (command == "STATUSES"){
+						setStatuses(data);
+					}
+					else if (command == "ROLE"){
+						role = data;
+						debug(data);
+					}
+					else if (command == "LOC"){
+						set("location", data);
+					}
+					else if (command == "WIPE"){
+						set(data, "");
+					}
+					else if (command == "PHASE"){
+						phase = data;
+						set("phase", data);
+					}
+					else if (command == "LOCATIONOPTIONS"){
+						debug("got locs");
+						setGuessForm(data);
+					}
+					else if (command == "WIN"){
+						if (role == "HACKER"){
+							winHacker();
+						}
+						else{
+							winAgent();
+						}
+					}
+					else{
+						addTo("debug", data);
+					}
+					//also have a command to rebuild the html for win/loss screens
+					
+					//other junk to blank out parts of the html
+					if (role != "HACKER"){
+						set("killdiv", "");
+						set("guessdiv", "");
+					}
+					
+					//if guest, blank name form
+					if (isGuest){
+						set("nameform", "");
+					}
+				}
+				socket.onclose = function(event) {
+					document.getElementById("chat").innerHTML += "Disconnected!<br />";
+				}
+			}
+			function die(){
+				document.write("<h3>You have been compromised!</h3>");
+			}
+			function winAgent(){
+				document.write("<h3>Congratulations, Agent " +  + get("name") + ". The Hacker has been neutralized!</h3>");
+			}
+			function winHacker(){
+				document.write("<h3>Congratulations, Hacker, the Agency's information has been stolen!</h3>");
+			}
+			function setKillForm(data){
+				//wipe form
+				var select = document.getElementById("killselect");
+				var length = select.options.length;
+				for (i = length-1; i >= 0; i--) {
+				  select.options[i] = null;
+				}
+				//rebuild form
+				var dataspl = data.split(".=.");
+				var i;
+				//the minus one is dumb but it works 
+				for (i=0; i < dataspl.length - 1; i ++){
+					addToSelect("killselect", dataspl[i]);
+				}
+			}
+			function setVoteForm(data){
+				//wipe form
+				var select = document.getElementById("voteselect");
+				var length = select.options.length;
+				for (i = length-1; i >= 0; i--) {
+				  select.options[i] = null;
+				}
+				//rebuild form
+				var dataspl = data.split(".=.");
+				var i;
+				//the minus one is dumb but it works 
+				for (i=0; i < dataspl.length - 1; i ++){
+					addToSelect("voteselect", dataspl[i]);
+				}
+			}
+			function setGuessForm(data){
+				//wipe form
+				var select = document.getElementById("guessselect");
+				var length = select.options.length;
+				for (i = length-1; i >= 0; i--) {
+				  select.options[i] = null;
+				}
+				//rebuild form
+				var dataspl = data.split(".=.");
+				var i;
+				//the minus one is dumb but it works 
+				for (i=0; i < dataspl.length - 1; i ++){
+					addToSelect("guessselect", dataspl[i]);
+				}
+			}
+			function setStatuses(data){
+				set("statuses","");
+				var dataspl = data.split(".=.");
+				var secondspl;
+				var i;
+				for (i=0; i < dataspl.length-1; i ++){
+					secondspl = dataspl[i].split("==");
+					if (secondspl[1] == "true"){
+						addTo("statuses", secondspl[0] + " is alive.");
+					}
+					else{
+						addTo("statuses", secondspl[0] + " is dead.");
+					}
+				}
+			}
+			function addToSelect(form, data){
+				// get reference to select element
+				var sel = document.getElementById(form);
+
+				// create new option element
+				var opt = document.createElement("option");
+
+				// create text node to add to option element (opt)
+				opt.appendChild( document.createTextNode(data) );
+
+				// set value property of opt
+				opt.value = data; 
+
+				// add opt to end of select box (sel)
+				sel.appendChild(opt); 
+			}
+			function sendChat() {
+				//socket.sendCommand("TEXT", document.chatform.message.value);
+				//return false;
+				debug ("sending chat");
+				socket.send("TEXT\*=" + document.chatform.message.value);
+				//socket.send(document.getElementById("name").innerHTML + "*=" + document.chatform.message.value);
+				return false;
+			}
+			function sendName() {
+				debug ("sending name");
+				socket.send("MYNAME\*=" + document.nameform.name.value);
+				//also changes name at top
+				document.getElementById("name").innerHTML = document.nameform.name.value;
+				return false;
+			}
+			function sendKill(){
+				//can only kill during messaging phase
+				var select = document.getElementById( "killselect" );
+				if (phase == "MESSAGING" && select.options.length > 0){
+					debug("sending kill");
+					var select = document.getElementById( "killselect" );
+					var chosenoption = select.options[ select.selectedIndex ].value;
+					socket.send("KILL\*=" + chosenoption);
+				}
+				return false;
+			}
+			function sendVote(){
+				//can only vote during voting phase
+				var select = document.getElementById( "voteselect" );
+				if (phase == "VOTING" && select.options.length > 0){
+					debug("sending vote");
+					var select = document.getElementById( "voteselect" );
+					var chosenoption = select.options[ select.selectedIndex ].value;
+					socket.send("VOTE\*=" + chosenoption);
+				}
+				return false;
+			}
+			//need to be limited
+			function sendGuess(){
+				//can only guess during messaging phase
+				var select = document.getElementById( "guessselect" );
+				if (phase == "MESSAGING" && select.options.length > 0){
+					debug("sending guess");
+					var select = document.getElementById( "guessselect" );
+					var chosenoption = select.options[ select.selectedIndex ].value;
+					socket.send("GUESS\*=" + chosenoption);
+				}
+				return false;
+			}
+			//currently busted for some reason
+			function sendCommand(command, data){
+				socket.send(command + "*=" + data);  //document.getElementById("name") + "*=" + 
+				//return false;
+			}
+			function set(position, data){
+				document.getElementById(position).innerHTML = data;
+			}
+			function get(position){
+				return document.getElementById(position).innerHTML;
+			}
+			function addTo(position, data){
+				document.getElementById(position).innerHTML += data;
+				document.getElementById(position).innerHTML += "<br>";
+			}
+			function debug(s){
+				addTo("debug", s);
+			}
+		</script>
+	</head>
+	<body onload="connectToServer()">
+	
+		<div id="name">John</div>
+		<form name="nameform" id="nameform" onsubmit="return sendName();">
+			<input type="text" name="name" /><br />
+			<input type="submit" name="submit" value="Send Name" />
+		</form>
+		
+		<h3>Current Phase:</h3>
+		<div id="phase"></div><br>
+		
+		<h3>Statuses:</h3><br>
+		<div id="statuses"></div>
+		
+		<div id="killdiv">
+		<label>Kill:</label>
+		<select form="killform" name="killselect" id="killselect">
+		</select><br>
+		<form name="killform" onsubmit="return sendKill();">
+			<input type="submit" name="submit" value="Kill">
+		</form>
+		</div>
+		<br>
+		
+		<div id="votediv">
+		<label>Vote:</label>
+		<select form="voteform" name="voteselect" id="voteselect">
+		</select><br>
+		<form name="voteform" onsubmit="return sendVote();">
+			<input type="submit" name="submit" value="Vote">
+		</form>
+		</div>
+		<br>
+		
+		<div id="guessdiv">
+		<label>Guess the Secret Location:</label>
+		<select form="guessform" name="guessselect" id="guessselect">
+		</select><br>
+		<form name="guessform" onsubmit="return sendGuess();">
+			<input type="submit" name="submit" value="Guess">
+		</form>
+		</div>
+		<br>
+		
+		<form name="chatform" onsubmit="return sendChat();">
+			<input type="text" name="message" /><br />
+			<input type="submit" name="submit" value="Send Chat" />
+		</form>
+		<br />
+		Time left:
+		<div id="time"></div><br>
+
+
+		<div id="locationArea">
+			The Secret Location:
+			<div id="location">Location</div>
+		</div>
+		
+		<h3><label> CHAT </label></h3>
+		<div id="chat"></div>
+		<h3><label> DEBUG </label></h3>
+		<div id="debug"></div>
+	</body>
+</html>

@@ -1,0 +1,108 @@
+.container {
+	padding: 0;
+	width: 100%;
+}
+hr {
+	margin-top: 25px;
+	margin-bottom: 25px;
+}
+.cont {
+	margin: 0;
+	max-width: 100%;
+}
+.div-form1, #reg-div{
+	width: 400px;
+	margin-right: auto;
+	margin-left: auto;
+	padding-top: 200px;
+	padding-bottom: 200px;
+}
+#div-menu, #room-page-1, #end-page-1{
+	width: 400px;
+	margin-right: auto;
+	margin-left: auto;
+	padding-top: 150px;
+	padding-bottom: 200px;
+}
+#game-page-1, #lb-page-1{
+	width: 800px;
+	margin-right: auto;
+	margin-left: auto;
+	padding-top: 150px;
+	padding-bottom: 200px;
+}
+.div-form1 div, #div-menu > div, #div-menu > form, #room-page-1 > div{
+	margin-top: 20px;
+}
+.div-form1 form div button {
+	width: 100px;
+}
+.div-form1 form div a {
+	width: 100px;
+}
+.container h1, h2, h3, ol li {
+	font-family: Georgia, serif;
+}
+#div-menu button, #div-menu a, #room-page-1 button, #room-page-1 a {
+	width: 100%;
+}
+#div-menu span {
+	margin-left: 12px;
+}
+.card {
+	padding: 0;
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-top: 20px;
+}
+#wrap {
+	margin-top: 20px;
+	padding-top: 20px;
+}
+#wrap > div, #msg-form > div {
+	margin-bottom: 20px;
+}
+#chat-log {
+	height: 400px;
+	overflow: scroll;
+}
+#msg-in {
+	width: 100%;
+	/*height: 50px;*/
+}
+#lb-table {
+	margin-top: 20px;
+}
+
+.hid{
+	display: none;
+}
+
+#msg-form div{
+	margin-left: 4px;
+	margin-right: 4px;
+}
+/* this won't load. I think the style sheet import is getting overwritten on the win/lose states*/
+div.endscreen{
+	font-size: 300%;
+	font-weight: bold;
+	text-align: center;
+}
+
+.location_text{
+	font-size: 100%;
+	font-weight: bold;
+	text-align: center;
+}
+.location_name{
+	font-size: 400%;
+	font-weight: bold;
+	text-align: center;
+}
+
+/*this can be changed to make the guess buttons look different*/
+.location_card{
+	font-size: 85%;
+	text-align: center;
+	font-weight: bold;
+}

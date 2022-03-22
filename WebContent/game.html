@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Infiltrated</title>
+	<meta charset="utf-8">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="game.js"></script>
+</head>
+<body class="bg-light bg-gradient" onload="connectToServer()" onbeforeunload="socket.close()">
+	<div id="results"></div>
+	
+	<div id="allelse">
+	<div class="container cont">
+		<nav class="navbar navbar-dark bg-dark">
+			<div class="container-fluid">
+		    	<span class="navbar-text"><span id=name>Namecheck</span> - <span id=loggedin>[Logged in/Guest]</span></span>
+		    	<a href="menu.html" class="btn btn-outline-light" onclick="socket.close()">EXIT GAME</a>
+		    	<!-- (2) -->
+			</div>
+		</nav>
+		<div id="game-page-1">
+			<h1 id="role" class="text-center">-- HACKER --</h1>
+			<h2 class="text-center"><span id="phase">PHASE </span>... TIME LEFT: <span id="time"></span></h2>
+			<!-- (3) -->
+			<div class="row">
+				<div class="col-6">
+					<div id="location">
+						<div >The secret location:</div><br>
+						<div id="specloc" class="endscreen">LOCATION TEST</div>
+					</div>
+					<div class="container-fluid" id="location-cards">
+						<div class="row">
+							<div class="col card">
+								 <div id="p1" class="card-body text-white bg-secondary" onclick="return sendGuess2('Courthouse')"><span class="location_card">Courthouse</span></div>
+							</div>
+							<div class="col card">
+								 <div id="p2" class="card-body text-white bg-secondary" onclick="return sendGuess2('Clocktower')"><span class="location_card">Clocktower</span></div>
+							</div>
+							<div class="col card">
+								 <div id="p3" class="card-body text-white bg-secondary"onclick="return sendGuess2('Station')"><span class="location_card">
+								 	Station</span>
+								 </div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col card">
+								 <div id="p4" class="card-body text-white bg-secondary"onclick="return sendGuess2('Lighthouse')"><span class="location_card">Lighthouse</span></div>
+							</div>
+							<div class="col card">
+								 <div id="p5" class="card-body text-white bg-secondary"onclick="return sendGuess2('Church')"><span class="location_card">Church</span></div>
+							</div>
+							<div class="col card">
+								 <div id="p6" class="card-body text-white bg-secondary"onclick="return sendGuess2('Pier')"><span class="location_card">Pier</span></div>
+							</div>
+						</div>
+						</div>
+						<hr>
+						<h3>List of players:</h3>
+						<ol id="statuses" class="text-center">
+						</ol>
+				
+					
+					<div class="card">
+						<div class="card-body bg-secondary text-white">
+							<form id="vote-form" onsubmit="return sendVote()">
+								<h3>Vote: who is the hacker?</h3>
+								<div class="row">
+									<div class="col">
+										<select id="vote-select" class="form-select" name="vote">
+										</select>
+									</div>
+									<div class="col-4">
+										<button id="vote-submit" type="submit" class="btn btn-dark">Confirm</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+					
+					<div id="murder-card" class="card">
+						<div class="card-body bg-dark text-white">
+							<form id="murder-form" onsubmit="return sendKill()">
+								<h3>Murder: choose your victim</h3>
+								<div class="row">
+									<div class="col">
+										<select id="murder-select" class="form-select" name="murder">
+										</select>
+									</div>
+									<div class="col-4">
+										<button id="murder-submit" type="submit" class="btn btn-danger">Confirm</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-6">
+					<div id="wrap" class="container-fluid border border-3 border-secondary rounded-3">
+						<div id="chat-log" class="border-bottom border-secondary rounded-3">
+							
+						</div>
+						<form id="msg-form" onsubmit="return sendChat()">
+							<div class="row">
+								<textarea id="msg-in" rows="3" name="" placeholder="Enter Message Here"></textarea>
+							</div>
+							<div class="row">
+								<button type="submit" class="btn btn-dark">SEND</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="debug"></div>
+	</div>
+
+	<script type="text/javascript">
+		
+		// (3)
+		// <h1>
+		// document.querySelector("h1").innerHTML = "-- AGENT --";
+		// highlight target
+		// document.querySelector("#p3").classList.remove("bg-seconday");
+		// document.querySelector("#p3").classList.add("bg-danger");
+		// hide murder
+		// document.querySelector("#murder-card").classList.add("hid");
+
+		// (4)
+		// see room.html
+		// #gm-player-ol
+		// add <option> to #vote-select and #murder-select, disabled=true for current player
+
+		// (5) 
+		// disable:
+		//document.querySelector("#vote-form").onsubmit = function(event) {
+		//	event.preventDefault();
+		//	document.querySelector("#vote-submit").disabled = true;
+		//	document.querySelector("#vote-select").disabled = true;
+		//}
+		// similar for murder-form
+		//document.querySelector("#murder-form").onsubmit = function(event) {
+		//	event.preventDefault();
+		//	document.querySelector("#murder-submit").disabled = true;
+		//	document.querySelector("#murder-select").disabled = true;
+		//}
+
+		// (7)
+		document.querySelector("#pl4").classList.add("text-danger");
+		document.querySelector("#pl4").innerHTML += " [Eliminated]";
+		document.querySelector("#pl4").style.textDecoration = "line-through";
+
+		// (8)
+		// add message:
+		//let name = "PLAYER X";
+		//let msg = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+		//let innerDiv = document.createElement("div");
+		//innerDiv.classList.add("card-body");
+		//innerDiv.innerHTML = "[hh:mm:ss] " + name + ": " + msg;
+		//let outerDiv = document.createElement("div");
+		//outerDiv.classList.add("card");
+		// for system *new phase* messages, also add class "border-primary" and "text-primary" to outerDiv
+		//outerDiv.appendChild(innerDiv);
+		//document.querySelector("#chat-log").appendChild(outerDiv);
+
+	</script>
+
+</body>
+</html>

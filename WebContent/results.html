@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Infiltrated</title>
+	<meta charset="utf-8">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<script>
+		function onLoad(){
+			if (localStorage.getItem("username") != null){
+				document.getElementById("username").innerHTML = localStorage.getItem("username");
+				document.getElementById("loggedin").innerHTML = "Logged in.";
+				document.querySelector("#more-text").innerHTML = "Your progress has been saved. Please click exit game to return to the menu, where you can check out the Leaderboard and your Player Stats page";
+			}
+			else{
+				document.getElementById("username").innerHTML = localStorage.getItem("guestign");
+				document.getElementById("loggedin").innerHTML = "Not logged in.";
+				document.querySelector("#more-text").innerHTML = "Please click exit game to return to the menu. Make an account to track your progress and view the Leaderboard.";
+			}
+			document.getElementById("role").innerHTML = localStorage.getItem("role");
+			
+			
+			if(localStorage.getItem("win")=="true"){
+				document.querySelector(".alert").classList.add("alert-success");
+				document.querySelector(".alert-heading").innerHTML = "YOU WIN!";
+				document.querySelector("#subtitle").innerHTML = "Well done!";
+				
+				// etc
+			}else{
+				document.querySelector(".alert").classList.add("alert-danger");
+				document.querySelector(".alert-heading").innerHTML = "YOU LOST";
+				document.querySelector("#subtitle").innerHTML = "Better luck next time.";
+				// etc
+			}
+			
+		}
+	</script>
+</head>
+<body class="bg-light bg-gradient" onload="onLoad()">
+
+	<div class="container cont">
+		<nav class="navbar navbar-dark bg-dark">
+			<div class="container-fluid">
+		    	<span class="navbar-text"><span id="username">[Username]</span> - <span id="loggedin">Not logged in.</span></span>
+		    	<a href="menu.html" class="btn btn-outline-light">EXIT GAME</a>
+		    	<!-- (2) -->
+			</div>
+		</nav>
+		<div id="end-page-1">
+			<h1 class="text-center" id="role">-- AGENT --</h1>
+			<div class="alert" role="alert">
+				<h3 class="alert-heading"></h4>
+				<p id="subtitle"></p>
+				<hr>
+				<p id="more-text" class="mb-0"></p>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		//let win = true;
+		/*if(localStorage.getItem("win")=="true"){
+			document.querySelector(".alert").classList.add("alert-success");
+			document.querySelector(".alert-heading").innerHTML = "YOU WIN!";
+			document.querySelector("#subtitle").innerHTML = "Congratulatory text, etc, etc, ";
+			
+			// etc
+		}else{
+			document.querySelector(".alert").classList.add("alert-danger");
+			document.querySelector(".alert-heading").innerHTML = "YOU LOST";
+			document.querySelector("#subtitle").innerHTML = "Good luck next time, etc, etc, ";
+			// etc
+		}*/
+
+		//document.querySelector("#more-text").innerHTML = "Game summary text etc, etc. (For users: Your progress has been saved.) Please click exit game to return to menu.";
+
+	</script>
+
+</body>
+</html>
